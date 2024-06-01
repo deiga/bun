@@ -511,6 +511,11 @@ inline __attribute__((always_inline)) LIBUS_SOCKET_DESCRIPTOR bsd_bind_listen_fd
         setsockopt(listenFd, SOL_SOCKET, SO_REUSEADDR, (void *) &enabled, sizeof(enabled));
 #endif
 
+    } else {
+        #if !defined(_WIN32)
+            int enabled = 1;
+            setsockopt(listenFd, SOL_SOCKET, SO_REUSEADDR, (void *) &enabled, sizeof(enabled));
+        #endif
     }
 
 #ifdef IPV6_V6ONLY

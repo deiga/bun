@@ -204,7 +204,7 @@ private:
                 selectedRouter->getUserData() = {(HttpResponse<SSL> *) s, httpRequest};
                 if (!selectedRouter->route(httpRequest->getCaseSensitiveMethod(), httpRequest->getUrl())) {
                     /* We have to force close this socket as we have no handler for it */
-                    us_socket_close(SSL, (us_socket_t *) s, 0, nullptr);
+                    us_socket_close(SSL, (us_socket_t *) s, LIBUS_SOCKET_CLOSE_CODE_CONNECTION_RESET, nullptr);
                     return nullptr;
                 }
 
@@ -279,7 +279,7 @@ private:
                 return user;
             }, [](void *user) {
                  /* Close any socket on HTTP errors */
-                us_socket_close(SSL, (us_socket_t *) user, 0, nullptr);
+                us_socket_close(SSL, (us_socket_t *) user, LIBUS_SOCKET_CLOSE_CODE_CONNECTION_RESET, nullptr);
                 return nullptr;
             });
 
@@ -289,7 +289,7 @@ private:
             /* If we got fullptr that means the parser wants us to close the socket from error (same as calling the errorHandler) */
             if (returnedSocket == FULLPTR) {
                 /* Close any socket on HTTP errors */
-                us_socket_close(SSL, s, 0, nullptr);
+                us_socket_close(SSL, s, LIBUS_SOCKET_CLOSE_CODE_CONNECTION_RESET, nullptr);
                 /* This just makes the following code act as if the socket was closed from error inside the parser. */
                 returnedSocket = nullptr;
             }
@@ -387,7 +387,7 @@ private:
                         asyncSocket->shutdown();
                         /* We need to force close after sending FIN since we want to hinder
                          * clients from keeping to send their huge data */
-                        asyncSocket->close();
+                        asyncSocket->close(LIBUS_SOCKET_CLOSE_CODE_CONNECTION_RESET);
                     }
                 }
             }
@@ -403,7 +403,7 @@ private:
 
             /* We do not care for half closed sockets */
             AsyncSocket<SSL> *asyncSocket = (AsyncSocket<SSL> *) s;
-            return asyncSocket->close();
+            return asyncSocket->close(LIBUS_SOCKET_CLOSE_CODE_CONNECTION_RESET);
 
         });
 
@@ -412,7 +412,7 @@ private:
 
             /* Force close rather than gracefully shutdown and risk confusing the client with a complete download */
             AsyncSocket<SSL> *asyncSocket = (AsyncSocket<SSL> *) s;
-            return asyncSocket->close();
+            return asyncSocket->close(LIBUS_SOCKET_CLOSE_CODE_CONNECTION_RESET);
 
         });
 

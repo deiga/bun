@@ -270,7 +270,13 @@ private:
                 webSocketData->subscriber = nullptr;
 
                 if (webSocketContextData->closeHandler) {
-                    webSocketContextData->closeHandler((WebSocket<SSL, isServer, USERDATA> *) s, 1006, {(char *) reason, (size_t) code});
+                    if (code == LIBUS_SOCKET_CLOSE_CODE_CONNECTION_RESET) {
+                        // WebSocket was closed abnormally
+                        webSocketContextData->closeHandler((WebSocket<SSL, isServer, USERDATA> *) s, 1006, {});
+                    } else {
+                        webSocketContextData->closeHandler((WebSocket<SSL, isServer, USERDATA> *) s, 1006, {(char *) reason, (size_t) code});
+                    }
+                    
                 }
             }
 

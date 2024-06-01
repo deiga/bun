@@ -116,8 +116,8 @@ public:
     }
 
     /* Immediately close socket */
-    us_socket_t *close() {
-        return us_socket_close(SSL, (us_socket_t *) this, 0, nullptr);
+    us_socket_t *close(int code = 0) {
+        return us_socket_close(SSL, (us_socket_t *) this, code, nullptr);
     }
 
     void corkUnchecked() {
